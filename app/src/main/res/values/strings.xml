@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">半小时震动</string>
+
+    <string name="master">总开关</string>
+    <string name="section_days">每周哪几天</string>
+    <string name="section_time">每天几点到几点</string>
+    <string name="start_time">开始 %1$s</string>
+    <string name="end_time">结束 %1$s</string>
+    <string name="hint_normal">在这个时段内，每 30 分钟震动一次。</string>
+    <string name="hint_overnight">开始晚于结束 = 跨午夜（星期按开始那天算）。</string>
+    <string name="hint_all_day">开始等于结束 = 所选日期全天。</string>
+
+    <string name="status_off">总开关已关闭，不会震动</string>
+    <string name="status_ringing">正在震动中，点"我现在去休息"停止</string>
+    <string name="status_none">所选的星期/时段里排不出震动时间，请检查设置</string>
+    <string name="status_next">下次震动：%1$s</string>
+
+    <string name="btn_test">立即测试一次震动</string>
+    <string name="test_confirm">马上开始震动和闪屏，点"我现在去休息"才会停。测试完以后，30 分钟后会再震一次（在开启时段内）。</string>
+    <string name="test_now">开始测试</string>
+
+    <string name="section_perms">权限（全部打 ✓ 才能保证准时震动）</string>
+    <string name="perms_intro">打开 APP 时会自动逐个申请。某一项被拒绝后，点右边按钮手动开启。</string>
+    <string name="btn_grant_all">一键申请全部权限</string>
+    <string name="all_granted">所有系统权限都已开启。国产手机请再把下面的"自启动"也打开。</string>
+    <string name="perm_go">去开启</string>
+    <string name="perm_granted">已开启</string>
+
+    <string name="perm_notif">通知</string>
+    <string name="perm_notif_desc">震动时要显示通知和按钮</string>
+    <string name="perm_exact">闹钟和提醒（精确定时）</string>
+    <string name="perm_exact_desc">保证每 30 分钟准时触发，不被省电推迟</string>
+    <string name="perm_battery">忽略电池优化</string>
+    <string name="perm_battery_desc">防止后台被系统杀掉</string>
+    <string name="perm_overlay">显示在其他应用上层</string>
+    <string name="perm_overlay_desc">在你用别的 APP 时也能直接弹出闪屏界面</string>
+    <string name="perm_fullscreen">全屏通知</string>
+    <string name="perm_fullscreen_desc">锁屏时点亮屏幕并全屏显示</string>
+
+    <string name="section_oem">国产手机额外设置（系统不允许 APP 自动打开，需手动）</string>
+    <string name="oem_intro">小米/华为/OPPO/vivo 等会额外拦截后台应用。请在下面的页面里把本应用的"自启动""后台弹出界面""锁屏显示"都打开，电池设置改为"无限制"。</string>
+    <string name="btn_autostart">打开"自启动"设置</string>
+    <string name="btn_xiaomi">小米：后台弹出界面 / 锁屏显示</string>
+    <string name="btn_app_details">打开本应用详情（电池/权限）</string>
+
+    <string name="channel_name">半小时提醒</string>
+    <string name="channel_desc">到点震动和闪屏</string>
+    <string name="alarm_title">该休息了！</string>
+    <string name="alarm_text">点"我现在去休息"停止震动</string>
+    <string name="btn_rest">我现在去休息</string>
+</resources>
