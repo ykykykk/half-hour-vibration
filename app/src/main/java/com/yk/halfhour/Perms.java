@@ -3,6 +3,7 @@ package com.yk.halfhour;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,10 +12,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.os.Process;
 import android.provider.Settings;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /** 需要的所有权限：怎么检查、怎么申请。 */
 final class Perms {
@@ -29,14 +33,36 @@ final class Perms {
         final int descRes;
         final Check check;
         final Request request;
+        /** 系统不提供查询接口，只能引导用户去看；引导过一次就算完成 */
+        final boolean manualOnly;
 
         Perm(String key, int titleRes, int descRes, Check check, Request request) {
+            this(key, titleRes, descRes, check, request, false);
+        }
+
+        Perm(String key, int titleRes, int descRes, Check check, Request request, boolean manualOnly) {
             this.key = key;
             this.titleRes = titleRes;
             this.descRes = descRes;
             this.check = check;
             this.request = request;
+            this.manualOnly = manualOnly;
         }
+    }
+
+    // 小米 MIUI / 澎湃 HyperOS 自己加的权限，存在 AppOps 里
+    private static final int MIUI_OP_AUTO_START = 10008;
+    private static final int MIUI_OP_SHOW_WHEN_LOCKED = 10020;
+    private static final int MIUI_OP_BACKGROUND_START_ACTIVITY = 10021;
+
+    private static final String ASKED = "asked";
+
+    static boolean asked(Context c, String key) {
+        return c.getSharedPreferences(ASKED, Context.MODE_PRIVATE).getBoolean(key, false);
+    }
+
+    static void markAsked(Context c, String key) {
+        c.getSharedPreferences(ASKED, Context.MODE_PRIVATE).edit().putBoolean(key, true).apply();
     }
 
     private Perms() {}
@@ -83,7 +109,32 @@ final class Perms {
                     (a, asked) -> open(a, new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
                             pkg(a)))));
         }
+        if (isXiaomi()) {
+            list.add(new Perm("miui_popup", R.string.perm_miui_popup, R.string.perm_miui_popup_desc,
+                    c -> miuiOpAllowed(c, MIUI_OP_BACKGROUND_START_ACTIVITY, "miui_popup")
+                            && miuiOpAllowed(c, MIUI_OP_SHOW_WHEN_LOCKED, "miui_popup"),
+                    (a, asked) -> openXiaomiPermEditor(a)));
+            list.add(new Perm("miui_autostart", R.string.perm_miui_autostart, R.string.perm_miui_autostart_desc,
+                    c -> miuiOpAllowed(c, MIUI_OP_AUTO_START, "miui_autostart"),
+                    (a, asked) -> openAutostart(a)));
+            list.add(new Perm("miui_power", R.string.perm_miui_power, R.string.perm_miui_power_desc,
+                    c -> asked(c, "miui_power"),
+                    (a, asked) -> openXiaomiPowerSaver(a), true));
+        }
         return list;
+    }
+
+    /** 读小米的隐藏 AppOps；读不到（系统改了接口）就退化成"引导过一次算完成"。 */
+    private static boolean miuiOpAllowed(Context c, int op, String key) {
+        try {
+            AppOpsManager ops = c.getSystemService(AppOpsManager.class);
+            Method m = AppOpsManager.class.getMethod("checkOpNoThrow",
+                    int.class, int.class, String.class);
+            int mode = (int) m.invoke(ops, op, Process.myUid(), c.getPackageName());
+            return mode == AppOpsManager.MODE_ALLOWED;
+        } catch (Throwable t) {
+            return asked(c, key);
+        }
     }
 
     static boolean allGranted(Context c) {
@@ -148,8 +199,22 @@ final class Perms {
     }
 
     static boolean isXiaomi() {
-        String m = Build.MANUFACTURER == null ? "" : Build.MANUFACTURER.toLowerCase();
+        String m = Build.MANUFACTURER == null ? "" : Build.MANUFACTURER.toLowerCase(Locale.ROOT);
         return m.contains("xiaomi") || m.contains("redmi") || m.contains("poco");
+    }
+
+    /** 小米：应用的"省电策略"页，要选"无限制"。 */
+    static void openXiaomiPowerSaver(Activity a) {
+        Intent i = new Intent("miui.intent.action.HIDDEN_APPS_CONFIG_ACTIVITY")
+                .setClassName("com.miui.powerkeeper", "com.miui.powerkeeper.ui.HiddenAppsConfigActivity")
+                .putExtra("package_name", a.getPackageName())
+                .putExtra("package_label", a.getString(R.string.app_name));
+        try {
+            a.startActivity(i);
+        } catch (RuntimeException e) {
+            // 新版澎湃 OS 在"应用详情 → 省电策略"里
+            openAppDetails(a);
+        }
     }
 
     /** 小米/红米：权限编辑页，里面有"后台弹出界面""锁屏显示""显示悬浮窗"。 */

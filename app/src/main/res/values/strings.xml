@@ -26,6 +26,7 @@
     <string name="all_granted">所有系统权限都已开启。国产手机请再把下面的"自启动"也打开。</string>
     <string name="perm_go">去开启</string>
     <string name="perm_granted">已开启</string>
+    <string name="perm_recheck">再去确认</string>
 
     <string name="perm_notif">通知</string>
     <string name="perm_notif_desc">震动时要显示通知和按钮</string>
@@ -38,10 +39,18 @@
     <string name="perm_fullscreen">全屏通知</string>
     <string name="perm_fullscreen_desc">锁屏时点亮屏幕并全屏显示</string>
 
+    <string name="perm_miui_popup">小米：后台弹出界面 + 锁屏显示</string>
+    <string name="perm_miui_popup_desc">在打开的页面里把"后台弹出界面""锁屏显示""显示悬浮窗"都设为允许。不开的话到点只震不弹</string>
+    <string name="perm_miui_autostart">小米：自启动</string>
+    <string name="perm_miui_autostart_desc">打开本应用的开关，否则重启手机后不再提醒</string>
+    <string name="perm_miui_power">小米：省电策略 → 无限制</string>
+    <string name="perm_miui_power_desc">系统查不到这一项，请确认已选"无限制"（不是"智能限制"）</string>
+
     <string name="section_oem">国产手机额外设置（系统不允许 APP 自动打开，需手动）</string>
     <string name="oem_intro">小米/华为/OPPO/vivo 等会额外拦截后台应用。请在下面的页面里把本应用的"自启动""后台弹出界面""锁屏显示"都打开，电池设置改为"无限制"。</string>
     <string name="btn_autostart">打开"自启动"设置</string>
-    <string name="btn_xiaomi">小米：后台弹出界面 / 锁屏显示</string>
+    <string name="section_oem_xiaomi">小米额外设置（APP 无法代你操作）</string>
+    <string name="oem_intro_xiaomi">1. 打开"最近任务"，长按（或下拉）本应用的卡片，点"锁定"，防止一键清理时被杀。\n2. 设置 → 声音与振动：确认振动没有关、振动强度调到最大。\n3. 如果开了"勿扰"，在勿扰设置里允许"闹钟"。</string>
     <string name="btn_app_details">打开本应用详情（电池/权限）</string>
 
     <string name="channel_name">半小时提醒</string>

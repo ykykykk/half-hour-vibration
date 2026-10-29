@@ -112,10 +112,12 @@
             android:orientation="vertical" />
 
         <TextView
+            android:id="@+id/oem_title"
             style="@style/SectionTitle"
             android:text="@string/section_oem" />
 
         <TextView
+            android:id="@+id/oem_intro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/oem_intro"
@@ -127,12 +129,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_autostart" />
-
-        <Button
-            android:id="@+id/btn_xiaomi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_xiaomi" />
 
         <Button
             android:id="@+id/btn_app_details"

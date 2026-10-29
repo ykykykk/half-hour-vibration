@@ -71,10 +71,14 @@ public class MainActivity extends Activity {
             autoAsked.clear();
             askNextMissing(true);
         });
-        findViewById(R.id.btn_autostart).setOnClickListener(v -> Perms.openAutostart(this));
-        View xiaomi = findViewById(R.id.btn_xiaomi);
-        xiaomi.setVisibility(Perms.isXiaomi() ? View.VISIBLE : View.GONE);
-        xiaomi.setOnClickListener(v -> Perms.openXiaomiPermEditor(this));
+        View autostart = findViewById(R.id.btn_autostart);
+        autostart.setOnClickListener(v -> Perms.openAutostart(this));
+        if (Perms.isXiaomi()) {
+            // 小米的自启动/后台弹出/锁屏显示/省电策略已经在上面的权限列表里自动检测和引导
+            autostart.setVisibility(View.GONE);
+            ((TextView) findViewById(R.id.oem_title)).setText(R.string.section_oem_xiaomi);
+            ((TextView) findViewById(R.id.oem_intro)).setText(R.string.oem_intro_xiaomi);
+        }
         findViewById(R.id.btn_app_details).setOnClickListener(v -> Perms.openAppDetails(this));
 
         findViewById(R.id.btn_test).setOnClickListener(v -> new AlertDialog.Builder(this)
@@ -112,8 +116,8 @@ public class MainActivity extends Activity {
             if (p.check.granted(this)) continue;
             if (autoAsked.contains(p.key)) continue;
             autoAsked.add(p.key);
-            boolean askedBefore = getSharedPreferences("asked", MODE_PRIVATE).getBoolean(p.key, false);
-            getSharedPreferences("asked", MODE_PRIVATE).edit().putBoolean(p.key, true).apply();
+            boolean askedBefore = Perms.asked(this, p.key);
+            Perms.markAsked(this, p.key);
             p.request.request(this, askedBefore);
             return;
         }
@@ -132,14 +136,19 @@ public class MainActivity extends Activity {
             TextView desc = row.findViewById(R.id.perm_desc);
             Button btn = row.findViewById(R.id.perm_btn);
             boolean ok = p.check.granted(this);
-            name.setText(getString(p.titleRes) + (ok ? "  ✓" : "  ✗"));
+            name.setText(getString(p.titleRes) + (p.manualOnly ? (ok ? "  ✓?" : "  ✗") : (ok ? "  ✓" : "  ✗")));
             name.setTextColor(ok ? Color.rgb(0, 140, 60) : Color.rgb(210, 0, 0));
             desc.setText(p.descRes);
-            btn.setText(ok ? R.string.perm_granted : R.string.perm_go);
-            btn.setEnabled(!ok);
+            if (p.manualOnly) {
+                // 查不到真实状态，按钮一直可点，方便回去确认
+                btn.setText(ok ? R.string.perm_recheck : R.string.perm_go);
+            } else {
+                btn.setText(ok ? R.string.perm_granted : R.string.perm_go);
+                btn.setEnabled(!ok);
+            }
             btn.setOnClickListener(v -> {
-                boolean asked = getSharedPreferences("asked", MODE_PRIVATE).getBoolean(p.key, false);
-                getSharedPreferences("asked", MODE_PRIVATE).edit().putBoolean(p.key, true).apply();
+                boolean asked = Perms.asked(this, p.key);
+                Perms.markAsked(this, p.key);
                 p.request.request(this, asked);
             });
             permList.addView(row);
