@@ -1,61 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">半小时震动</string>
+    <string name="subtitle">每 30 分钟提醒你起身休息</string>
 
-    <string name="master">总开关</string>
-    <string name="section_days">每周哪几天</string>
-    <string name="section_time">每天几点到几点</string>
-    <string name="start_time">开始 %1$s</string>
-    <string name="end_time">结束 %1$s</string>
-    <string name="hint_normal">在这个时段内，每 30 分钟震动一次。</string>
-    <string name="hint_overnight">开始晚于结束 = 跨午夜（星期按开始那天算）。</string>
-    <string name="hint_all_day">开始等于结束 = 所选日期全天。</string>
+    <!-- 状态卡片 -->
+    <string name="hero_next">下次提醒</string>
+    <string name="hero_off">提醒已关闭</string>
+    <string name="hero_off_big">已关闭</string>
+    <string name="hero_off_sub">打开右边的开关开始提醒</string>
+    <string name="hero_ringing">正在提醒</string>
+    <string name="hero_ringing_big">该休息了</string>
+    <string name="hero_ringing_sub">点「我现在去休息」停止</string>
+    <string name="hero_none">没有可用时段</string>
+    <string name="hero_none_big">--:--</string>
+    <string name="hero_none_sub">请检查下面的日期和时段</string>
+    <string name="today">今天</string>
+    <string name="tomorrow">明天</string>
 
-    <string name="status_off">总开关已关闭，不会震动</string>
-    <string name="status_ringing">正在震动中，点"我现在去休息"停止</string>
-    <string name="status_none">所选的星期/时段里排不出震动时间，请检查设置</string>
-    <string name="status_next">下次震动：%1$s</string>
+    <string name="section_days">提醒日期</string>
+    <string name="section_time">提醒时段</string>
+    <string name="label_start">开始</string>
+    <string name="label_end">结束</string>
+    <string name="to">至</string>
+    <string name="hint_normal">在这个时段里，每 30 分钟震动一次</string>
+    <string name="hint_overnight">结束早于开始，表示跨过午夜（按开始那天算星期）</string>
+    <string name="hint_all_day">开始等于结束，表示所选日期全天提醒</string>
 
-    <string name="btn_test">立即测试一次震动</string>
-    <string name="test_confirm">马上开始震动和闪屏，点"我现在去休息"才会停。测试完以后，30 分钟后会再震一次（在开启时段内）。</string>
-    <string name="test_now">开始测试</string>
+    <string name="section_perms">权限与设置</string>
+    <string name="perm_all_ok">全部就绪</string>
+    <string name="perm_left">%1$d 项未完成</string>
+    <string name="state_ok">已开启</string>
+    <string name="state_confirmed">已确认</string>
+    <string name="state_missing">未开启</string>
+    <string name="state_todo">待确认</string>
+    <string name="btn_guide">开始设置向导</string>
 
-    <string name="section_perms">权限（全部打 ✓ 才能保证准时震动）</string>
-    <string name="perms_intro">打开 APP 时会自动逐个申请。某一项被拒绝后，点右边按钮手动开启。</string>
-    <string name="btn_grant_all">一键申请全部权限</string>
-    <string name="all_granted">所有系统权限都已开启。国产手机请再把下面的"自启动"也打开。</string>
-    <string name="perm_go">去开启</string>
-    <string name="perm_granted">已开启</string>
-    <string name="perm_recheck">再去确认</string>
+    <string name="btn_test">测试一次震动</string>
+    <string name="test_title">测试震动</string>
+    <string name="test_body">马上开始震动和闪屏，点「我现在去休息」才会停止。\n\n建议测三次：亮屏时、锁屏后、打开别的 APP 时。</string>
+    <string name="test_start">开始测试</string>
+    <string name="cancel">取消</string>
 
-    <string name="perm_notif">通知</string>
-    <string name="perm_notif_desc">震动时要显示通知和按钮</string>
-    <string name="perm_exact">闹钟和提醒（精确定时）</string>
-    <string name="perm_exact_desc">保证每 30 分钟准时触发，不被省电推迟</string>
-    <string name="perm_battery">忽略电池优化</string>
-    <string name="perm_battery_desc">防止后台被系统杀掉</string>
-    <string name="perm_overlay">显示在其他应用上层</string>
-    <string name="perm_overlay_desc">在你用别的 APP 时也能直接弹出闪屏界面</string>
-    <string name="perm_fullscreen">全屏通知</string>
-    <string name="perm_fullscreen_desc">锁屏时点亮屏幕并全屏显示</string>
+    <!-- 向导通用 -->
+    <string name="guide_step">第 %1$d 步 / 共 %2$d 步</string>
+    <string name="guide_go_grant">去开启</string>
+    <string name="guide_go_settings">去设置</string>
+    <string name="guide_done">我已完成</string>
+    <string name="guide_again">还没有，再去一次</string>
+    <string name="guide_skip">跳过这一步</string>
+    <string name="guide_later">以后再说</string>
+    <string name="guide_retry">还没有检测到开启，请按上面的说明再试一次。</string>
+    <string name="guide_confirm_title">%1$s：完成了吗？</string>
+    <string name="guide_confirm_note">这一项系统不允许 APP 检查，请你确认已经按上面的说明设置好了。</string>
+    <string name="guide_finish_title">设置完成</string>
+    <string name="guide_finish_title_partial">向导结束</string>
+    <string name="guide_finish_body">建议现在测试一次：会马上震动和闪屏，点「我现在去休息」停止。</string>
+    <string name="guide_finish_left">还有 %1$d 项没完成，到点可能不震或不弹。随时可以在首页「权限与设置」里点开继续。</string>
+    <string name="guide_test_now">立即测试</string>
 
-    <string name="perm_miui_popup">小米：后台弹出界面 + 锁屏显示</string>
-    <string name="perm_miui_popup_desc">在打开的页面里把"后台弹出界面""锁屏显示""显示悬浮窗"都设为允许。不开的话到点只震不弹</string>
-    <string name="perm_miui_autostart">小米：自启动</string>
-    <string name="perm_miui_autostart_desc">打开本应用的开关，否则重启手机后不再提醒</string>
-    <string name="perm_miui_power">小米：省电策略 → 无限制</string>
-    <string name="perm_miui_power_desc">系统查不到这一项，请确认已选"无限制"（不是"智能限制"）</string>
+    <!-- 各步骤 -->
+    <string name="step_notif">允许通知</string>
+    <string name="step_notif_how">到点时需要显示提醒和「我现在去休息」按钮。\n\n点「去开启」后，系统会弹出一个窗口，请选择「允许」。</string>
+    <string name="step_notif_how_blocked">之前拒绝过通知，系统不会再弹窗了。\n\n点「去开启」后会打开通知设置页，请打开「允许通知」开关，然后返回本应用。</string>
 
-    <string name="section_oem">国产手机额外设置（系统不允许 APP 自动打开，需手动）</string>
-    <string name="oem_intro">小米/华为/OPPO/vivo 等会额外拦截后台应用。请在下面的页面里把本应用的"自启动""后台弹出界面""锁屏显示"都打开，电池设置改为"无限制"。</string>
-    <string name="btn_autostart">打开"自启动"设置</string>
-    <string name="section_oem_xiaomi">小米额外设置（APP 无法代你操作）</string>
-    <string name="oem_intro_xiaomi">1. 打开"最近任务"，长按（或下拉）本应用的卡片，点"锁定"，防止一键清理时被杀。\n2. 设置 → 声音与振动：确认振动没有关、振动强度调到最大。\n3. 如果开了"勿扰"，在勿扰设置里允许"闹钟"。</string>
-    <string name="btn_app_details">打开本应用详情（电池/权限）</string>
+    <string name="step_exact">允许设置闹钟</string>
+    <string name="step_exact_how">保证每 30 分钟准时触发，不会被省电推迟。\n\n点「去开启」后会打开「闹钟和提醒」页面，请打开本应用的开关，然后返回。</string>
 
+    <string name="step_battery">允许后台运行</string>
+    <string name="step_battery_how">防止系统为了省电把本应用关掉。\n\n点「去开启」后，系统会弹出一个窗口，请选择「允许」。</string>
+
+    <string name="step_overlay">显示在其他应用上层</string>
+    <string name="step_overlay_how">这样你在用别的 APP 时，提醒界面也能直接弹出来。\n\n点「去开启」后会打开一个列表，找到「半小时震动」，打开开关，然后返回。</string>
+
+    <string name="step_fullscreen">全屏通知</string>
+    <string name="step_fullscreen_how">锁屏时点亮屏幕并全屏显示提醒。\n\n点「去开启」后，请打开「允许全屏通知」开关，然后返回。</string>
+
+    <string name="step_miui_popup">后台弹出界面和锁屏显示</string>
+    <string name="step_miui_popup_how">这是小米特有的限制，不开的话到点只震动、不弹界面。\n\n点「去开启」后会打开小米的权限页，请把下面两项都改成「允许」：\n·  后台弹出界面\n·  锁屏显示\n\n然后返回本应用。</string>
+
+    <string name="step_autostart">自启动</string>
+    <string name="step_autostart_how">不开的话，手机重启后就不会再提醒了。\n\n点「去开启」后会打开自启动管理页，找到「半小时震动」并打开开关，然后返回。</string>
+    <string name="step_autostart_how_other">不开的话，手机重启后可能不会再提醒。\n\n点「去设置」后会打开自启动（或「启动管理」「应用启动管理」）页面，找到「半小时震动」，允许自动启动和后台活动，然后返回。\n\n如果打开的是应用详情页，请在里面找相应选项。</string>
+
+    <string name="step_miui_power">省电策略设为无限制</string>
+    <string name="step_miui_power_how">小米默认的「智能限制」会在后台冻结本应用，导致到点不震。\n\n点「去设置」后，请选择「无限制」，然后返回。\n\n如果打开的是应用详情页，请点「省电策略」，再选「无限制」。</string>
+
+    <string name="step_lock">在最近任务里锁定</string>
+    <string name="step_lock_how">防止「一键清理」时把本应用清掉。\n\n1. 从屏幕底部上滑并停住（或点多任务键），打开最近任务\n2. 长按「半小时震动」的卡片（有的机型是把卡片往下拉）\n3. 点「锁定」，卡片上出现小锁图标就好了\n\n做完后回到这里，点「我已完成」。</string>
+
+    <string name="step_vibration">振动强度调到最大</string>
+    <string name="step_vibration_how">本应用已经用了安卓允许的最大震动力度，但系统里的振动强度设置会再打一次折扣。\n\n点「去设置」后会打开声音设置，请找到「振动」，确认振动已开启、强度拉到最大，然后返回。</string>
+
+    <string name="step_dnd">勿扰模式下允许闹钟</string>
+    <string name="step_dnd_how">如果你会开「勿扰模式」，需要允许闹钟，否则勿扰时不会震动。从来不用勿扰的话，可以直接跳过。\n\n点「去设置」后会打开勿扰设置，请确认「闹钟」是允许的，然后返回。</string>
+
+    <!-- 提醒界面和通知 -->
     <string name="channel_name">半小时提醒</string>
     <string name="channel_desc">到点震动和闪屏</string>
-    <string name="alarm_title">该休息了！</string>
-    <string name="alarm_text">点"我现在去休息"停止震动</string>
+    <string name="alarm_title">该休息了</string>
+    <string name="alarm_sub">起来走走，喝口水</string>
+    <string name="alarm_text">点「我现在去休息」停止震动</string>
     <string name="btn_rest">我现在去休息</string>
 </resources>

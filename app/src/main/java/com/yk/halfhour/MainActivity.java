@@ -1,37 +1,32 @@
 package com.yk.halfhour;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
-public class MainActivity extends Activity {
-    private static final int[] DAY_IDS = {
-            R.id.day0, R.id.day1, R.id.day2, R.id.day3, R.id.day4, R.id.day5, R.id.day6};
-
-    /** 本次打开 APP 已经自动申请过的权限，避免用户拒绝后反复弹 */
-    private final Set<String> autoAsked = new HashSet<>();
+public class MainActivity extends Activity implements Guide.Listener {
+    private static final String[] DAY_NAMES = {"一", "二", "三", "四", "五", "六", "日"};
 
     private Prefs prefs;
+    private Guide guide;
     private Switch master;
-    private Button startBtn, endBtn;
-    private TextView status;
+    private TextView startValue, endValue;
     private LinearLayout permList;
 
     @Override
@@ -39,12 +34,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         prefs = new Prefs(this);
+        guide = new Guide(this, this);
         AlarmService.ensureChannel(this);
 
         master = findViewById(R.id.master);
-        startBtn = findViewById(R.id.btn_start);
-        endBtn = findViewById(R.id.btn_end);
-        status = findViewById(R.id.status);
+        startValue = findViewById(R.id.start_value);
+        endValue = findViewById(R.id.end_value);
         permList = findViewById(R.id.perm_list);
 
         master.setChecked(prefs.enabled());
@@ -54,43 +49,22 @@ public class MainActivity extends Activity {
             settingsChanged();
         });
 
-        for (int i = 0; i < 7; i++) {
-            final int bit = 1 << i;
-            CheckBox cb = findViewById(DAY_IDS[i]);
-            cb.setChecked((prefs.days() & bit) != 0);
-            cb.setOnCheckedChangeListener((b, on) -> {
-                prefs.setDays(on ? (prefs.days() | bit) : (prefs.days() & ~bit));
-                settingsChanged();
-            });
+        buildDayChips();
+        findViewById(R.id.time_start).setOnClickListener(v -> pickTime(true));
+        findViewById(R.id.time_end).setOnClickListener(v -> pickTime(false));
+        findViewById(R.id.btn_guide).setOnClickListener(v -> guide.startAll());
+        findViewById(R.id.btn_test).setOnClickListener(v -> confirmTest());
+
+        // 打开 APP 时，有没完成的设置就自动进入向导（一步一步来）
+        if (savedInstanceState == null && Steps.pendingCount(this) > 0) {
+            getWindow().getDecorView().post(guide::startAll);
         }
-
-        startBtn.setOnClickListener(v -> pickTime(true));
-        endBtn.setOnClickListener(v -> pickTime(false));
-
-        findViewById(R.id.btn_grant_all).setOnClickListener(v -> {
-            autoAsked.clear();
-            askNextMissing(true);
-        });
-        View autostart = findViewById(R.id.btn_autostart);
-        autostart.setOnClickListener(v -> Perms.openAutostart(this));
-        if (Perms.isXiaomi()) {
-            // 小米的自启动/后台弹出/锁屏显示/省电策略已经在上面的权限列表里自动检测和引导
-            autostart.setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.oem_title)).setText(R.string.section_oem_xiaomi);
-            ((TextView) findViewById(R.id.oem_intro)).setText(R.string.oem_intro_xiaomi);
-        }
-        findViewById(R.id.btn_app_details).setOnClickListener(v -> Perms.openAppDetails(this));
-
-        findViewById(R.id.btn_test).setOnClickListener(v -> new AlertDialog.Builder(this)
-                .setMessage(R.string.test_confirm)
-                .setPositiveButton(R.string.test_now, (d, w) -> AlarmService.start(this))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        guide.onReturn();
         refreshTimes();
         refreshPerms();
         // 漏掉的闹钟（比如被系统清掉了）补排一下；正常情况下不动，避免打开 APP 就重置倒计时
@@ -100,59 +74,134 @@ public class MainActivity extends Activity {
                 && prefs.nextAt() < System.currentTimeMillis()) {
             Scheduler.rescheduleFromNow(this);
         }
-        refreshStatus();
-        askNextMissing(false);
+        refreshHero();
+    }
+
+    @Override
+    protected void onDestroy() {
+        guide.dismiss();
+        super.onDestroy();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        refreshPerms();
+        // 被"不再询问"拒绝时系统不弹窗、也不会触发 onResume，这里兜底
+        getWindow().getDecorView().post(guide::onReturn);
     }
 
-    /** 自动依次申请：每次只弹一个，用户处理完回到本页面（onResume）再弹下一个。 */
-    private void askNextMissing(boolean userClicked) {
-        for (Perms.Perm p : Perms.all()) {
-            if (p.check.granted(this)) continue;
-            if (autoAsked.contains(p.key)) continue;
-            autoAsked.add(p.key);
-            boolean askedBefore = Perms.asked(this, p.key);
-            Perms.markAsked(this, p.key);
-            p.request.request(this, askedBefore);
-            return;
-        }
-        if (userClicked && Perms.allGranted(this)) {
-            new AlertDialog.Builder(this).setMessage(R.string.all_granted)
-                    .setPositiveButton(android.R.string.ok, null).show();
+    // ---------- Guide.Listener ----------
+
+    @Override
+    public void onGuideChanged() {
+        refreshPerms();
+        refreshHero();
+    }
+
+    @Override
+    public void onGuideWantsTest() {
+        AlarmService.start(this);
+    }
+
+    // ---------- 界面 ----------
+
+    private void buildDayChips() {
+        LinearLayout row = findViewById(R.id.days);
+        int size = dp(40);
+        for (int i = 0; i < 7; i++) {
+            final int bit = 1 << i;
+            CheckBox chip = new CheckBox(this);
+            chip.setButtonDrawable(null);
+            chip.setBackgroundResource(R.drawable.chip_bg);
+            chip.setTextColor(getColorStateList(R.color.chip_text));
+            chip.setGravity(Gravity.CENTER);
+            chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            chip.setText(DAY_NAMES[i]);
+            chip.setChecked((prefs.days() & bit) != 0);
+            chip.setOnCheckedChangeListener((b, on) -> {
+                prefs.setDays(on ? (prefs.days() | bit) : (prefs.days() & ~bit));
+                settingsChanged();
+            });
+            FrameLayout cell = new FrameLayout(this);
+            cell.addView(chip, new FrameLayout.LayoutParams(size, size, Gravity.CENTER));
+            row.addView(cell, new LinearLayout.LayoutParams(0, size, 1));
         }
     }
 
     private void refreshPerms() {
         permList.removeAllViews();
-        List<Perms.Perm> all = Perms.all();
-        for (Perms.Perm p : all) {
+        int left = 0;
+        for (Steps.Step s : Steps.all()) {
             View row = getLayoutInflater().inflate(R.layout.row_perm, permList, false);
             TextView name = row.findViewById(R.id.perm_name);
-            TextView desc = row.findViewById(R.id.perm_desc);
-            Button btn = row.findViewById(R.id.perm_btn);
-            boolean ok = p.check.granted(this);
-            name.setText(getString(p.titleRes) + (p.manualOnly ? (ok ? "  ✓?" : "  ✗") : (ok ? "  ✓" : "  ✗")));
-            name.setTextColor(ok ? Color.rgb(0, 140, 60) : Color.rgb(210, 0, 0));
-            desc.setText(p.descRes);
-            if (p.manualOnly) {
-                // 查不到真实状态，按钮一直可点，方便回去确认
-                btn.setText(ok ? R.string.perm_recheck : R.string.perm_go);
-            } else {
-                btn.setText(ok ? R.string.perm_granted : R.string.perm_go);
-                btn.setEnabled(!ok);
-            }
-            btn.setOnClickListener(v -> {
-                boolean asked = Perms.asked(this, p.key);
-                Perms.markAsked(this, p.key);
-                p.request.request(this, asked);
-            });
+            TextView state = row.findViewById(R.id.perm_state);
+            View dot = row.findViewById(R.id.perm_dot);
+            boolean ok = s.satisfied(this);
+            boolean verified = s.state(this) != Steps.UNKNOWN;
+            if (!ok) left++;
+            name.setText(s.titleRes);
+            dot.setBackgroundResource(ok ? R.drawable.dot_ok : R.drawable.dot_pending);
+            state.setText(ok ? (verified ? R.string.state_ok : R.string.state_confirmed)
+                    : (verified ? R.string.state_missing : R.string.state_todo));
+            state.setTextColor(getColor(ok ? R.color.ok : R.color.pending));
+            row.setOnClickListener(v -> guide.startSingle(s));
             permList.addView(row);
         }
+        TextView summary = findViewById(R.id.perm_summary);
+        if (left == 0) {
+            summary.setText(R.string.perm_all_ok);
+            summary.setTextColor(getColor(R.color.ok));
+            summary.setBackgroundResource(R.drawable.pill_ok);
+        } else {
+            summary.setText(getString(R.string.perm_left, left));
+            summary.setTextColor(getColor(R.color.warn_text));
+            summary.setBackgroundResource(R.drawable.pill_pending);
+        }
+        findViewById(R.id.btn_guide).setVisibility(left == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void refreshHero() {
+        View hero = findViewById(R.id.hero);
+        TextView label = findViewById(R.id.hero_label);
+        TextView time = findViewById(R.id.hero_time);
+        TextView sub = findViewById(R.id.hero_sub);
+        hero.setBackgroundResource(prefs.enabled() ? R.drawable.hero_on : R.drawable.hero_off);
+        if (!prefs.enabled()) {
+            label.setText(R.string.hero_off);
+            time.setText(R.string.hero_off_big);
+            sub.setText(R.string.hero_off_sub);
+            return;
+        }
+        if (prefs.ringing()) {
+            label.setText(R.string.hero_ringing);
+            time.setText(R.string.hero_ringing_big);
+            sub.setText(R.string.hero_ringing_sub);
+            return;
+        }
+        long next = prefs.nextAt();
+        if (next < 0) {
+            label.setText(R.string.hero_none);
+            time.setText(R.string.hero_none_big);
+            sub.setText(R.string.hero_none_sub);
+            return;
+        }
+        ZonedDateTime t = Instant.ofEpochMilli(next).atZone(ZoneId.systemDefault());
+        LocalDate today = LocalDate.now();
+        String day;
+        if (t.toLocalDate().equals(today)) day = getString(R.string.today);
+        else if (t.toLocalDate().equals(today.plusDays(1))) day = getString(R.string.tomorrow);
+        else day = t.format(DateTimeFormatter.ofPattern("M月d日", Locale.CHINA));
+        label.setText(R.string.hero_next);
+        time.setText(t.format(DateTimeFormatter.ofPattern("HH:mm")));
+        sub.setText(day + " · " + t.format(DateTimeFormatter.ofPattern("EEEE", Locale.CHINA)));
+    }
+
+    private void refreshTimes() {
+        startValue.setText(fmt(prefs.startMin()));
+        endValue.setText(fmt(prefs.endMin()));
+        TextView hint = findViewById(R.id.time_hint);
+        int s = prefs.startMin(), e = prefs.endMin();
+        hint.setText(s == e ? R.string.hint_all_day : s > e ? R.string.hint_overnight : R.string.hint_normal);
     }
 
     private void pickTime(boolean start) {
@@ -165,36 +214,23 @@ public class MainActivity extends Activity {
         }, cur / 60, cur % 60, true).show();
     }
 
+    private void confirmTest() {
+        Ui.Spec spec = new Ui.Spec();
+        spec.title = getString(R.string.test_title);
+        spec.body = getString(R.string.test_body);
+        spec.primary = getString(R.string.test_start);
+        spec.onPrimary = () -> AlarmService.start(this);
+        spec.secondary = getString(R.string.cancel);
+        Ui.show(this, spec);
+    }
+
     private void settingsChanged() {
         if (!prefs.ringing()) Scheduler.rescheduleFromNow(this);
-        refreshStatus();
+        refreshHero();
     }
 
-    private void refreshTimes() {
-        startBtn.setText(getString(R.string.start_time, fmt(prefs.startMin())));
-        endBtn.setText(getString(R.string.end_time, fmt(prefs.endMin())));
-        TextView hint = findViewById(R.id.time_hint);
-        int s = prefs.startMin(), e = prefs.endMin();
-        hint.setText(s == e ? R.string.hint_all_day : s > e ? R.string.hint_overnight : R.string.hint_normal);
-    }
-
-    private void refreshStatus() {
-        if (!prefs.enabled()) {
-            status.setText(R.string.status_off);
-            return;
-        }
-        if (prefs.ringing()) {
-            status.setText(R.string.status_ringing);
-            return;
-        }
-        long next = prefs.nextAt();
-        if (next < 0) {
-            status.setText(R.string.status_none);
-            return;
-        }
-        String when = Instant.ofEpochMilli(next).atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("M月d日 EEEE HH:mm", Locale.CHINA));
-        status.setText(getString(R.string.status_next, when));
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
     }
 
     private static String fmt(int min) {

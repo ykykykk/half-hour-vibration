@@ -14,7 +14,6 @@ import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
 
@@ -30,7 +29,7 @@ public class AlarmActivity extends Activity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private View root;
-    private TextView title;
+    private TextView[] texts;
     private int colorIndex;
 
     private final BroadcastReceiver doneReceiver = new BroadcastReceiver() {
@@ -46,7 +45,8 @@ public class AlarmActivity extends Activity {
             colorIndex = (colorIndex + 1) % COLORS.length;
             int bg = COLORS[colorIndex];
             root.setBackgroundColor(bg);
-            title.setTextColor(bg == Color.WHITE ? Color.rgb(200, 0, 0) : Color.WHITE);
+            int fg = bg == Color.WHITE ? Color.rgb(200, 0, 0) : Color.WHITE;
+            for (TextView t : texts) t.setTextColor(fg);
             handler.postDelayed(this, FLASH_MS);
         }
     };
@@ -71,10 +71,10 @@ public class AlarmActivity extends Activity {
 
         setContentView(R.layout.activity_alarm);
         root = findViewById(R.id.root);
-        title = findViewById(R.id.title);
         TextView time = findViewById(R.id.time);
         time.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        Button rest = findViewById(R.id.btn_rest);
+        texts = new TextView[]{time, findViewById(R.id.title), findViewById(R.id.sub)};
+        View rest = findViewById(R.id.btn_rest);
         rest.setOnClickListener(v -> {
             AlarmService.rest(this);
             finish();

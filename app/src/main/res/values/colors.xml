@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="icon_bg">#E53935</color>
+    <color name="icon_bg">#FF5B5B</color>
+    <color name="bg">#F3F4F8</color>
+    <color name="card">#FFFFFF</color>
+    <color name="text_primary">#1C1E26</color>
+    <color name="text_body">#4A4F5C</color>
+    <color name="text_secondary">#8B90A0</color>
+    <color name="accent">#FF5B5B</color>
+    <color name="accent_dark">#E8414E</color>
+    <color name="ok">#22B573</color>
+    <color name="pending">#FF9F1C</color>
+    <color name="chip_off">#EEF0F4</color>
+    <color name="warn_text">#C2410C</color>
+    <color name="warn_bg">#FFF1E6</color>
+    <color name="info_text">#3949AB</color>
+    <color name="info_bg">#EEF1FF</color>
+    <color name="alarm_button">#1C1E26</color>
 </resources>

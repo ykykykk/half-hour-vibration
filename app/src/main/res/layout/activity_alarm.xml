@@ -3,40 +3,46 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="28dp">
 
     <TextView
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#CC000000"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:textColor="#FFFFFF"
-        android:textSize="56sp"
-        android:textStyle="bold" />
+        android:fontFamily="sans-serif-medium"
+        android:textSize="80sp" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:gravity="center"
+        android:layout_marginTop="8dp"
         android:text="@string/alarm_title"
-        android:textSize="34sp"
+        android:textSize="40sp"
         android:textStyle="bold" />
 
-    <Button
+    <TextView
+        android:id="@+id/sub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/alarm_sub"
+        android:textSize="18sp" />
+
+    <TextView
         android:id="@+id/btn_rest"
         android:layout_width="match_parent"
-        android:layout_height="140dp"
-        android:layout_marginTop="48dp"
-        android:background="@drawable/btn_rest_bg"
+        android:layout_height="120dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/btn_alarm"
+        android:clickable="true"
+        android:elevation="6dp"
+        android:focusable="true"
+        android:gravity="center"
         android:text="@string/btn_rest"
-        android:textColor="#FFFFFF"
-        android:textSize="32sp"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
         android:textStyle="bold" />
 </LinearLayout>
