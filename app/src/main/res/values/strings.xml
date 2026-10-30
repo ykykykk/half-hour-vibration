@@ -3,6 +3,22 @@
     <string name="app_name">半小时震动</string>
     <string name="subtitle">每 30 分钟提醒你起身休息</string>
 
+    <string name="watch_mode_title">HUAWEI WATCH FIT 5 联动</string>
+    <string name="watch_mode_description">手机持续震动和闪屏，同时立即发送手表提醒，之后每 30 秒重复发送，直到在手机上点「我现在去休息」。点完后 30 分钟再提醒。\n\n请在华为运动健康开启本应用的消息通知，并选择「多设备提醒」（如有）。手表每次振动由系统控制，可能限频，无法保证一直不停地振动。</string>
+    <string name="phone_mode_description">手机强提醒：持续震动并全屏闪烁，点「我现在去休息」后再等 30 分钟。</string>
+    <string name="watch_channel_name">手表联动提醒</string>
+    <string name="watch_channel_desc">手机响铃期间每 30 秒发送，由华为运动健康转发到手表</string>
+    <string name="watch_notification">第 %1$d 次提醒 · %2$s。请在手机上点「我现在去休息」停止提醒。</string>
+    <string name="watch_test_title">测试手机和手表一起提醒</string>
+    <string name="watch_test_button">测试手机和手表一起提醒</string>
+    <string name="watch_test_body">手机会立即持续震动和闪屏，并向通知栏发送手表提醒，之后每 30 秒重复发送。请在手机上点「我现在去休息」停止；开启提醒时，点完后 30 分钟再提醒。\n\n请查看手表是否收到，并等待至少 30 秒检查第二次提醒。本应用无法检测手表是否收到或振动；运动健康和手表可能限频，无法保证手表连续不停地振动。\n\n先在华为运动健康 → 设备 → WATCH FIT 5 → 消息通知开启「半小时震动」，允许运动健康读取通知并后台运行。关闭手表勿扰/睡眠模式；若有提醒模式选项，选择「多设备提醒」，避免手机亮屏时手表静默。</string>
+    <string name="watch_notification_blocked">通知已关闭。请在系统通知设置里允许「半小时震动」，并开启「手表联动提醒」类别，然后重新测试。</string>
+    <string name="step_watch_channel">允许手表联动通知</string>
+    <string name="step_watch_channel_how">请开启「手表联动提醒」通知类别，允许锁屏显示和横幅提醒，关闭静默通知，防止运动健康过滤通知。\n\n手表的振动强度请在手表的声音和振动设置里调整。</string>
+    <string name="step_watch_health">设置华为运动健康转发</string>
+    <string name="step_watch_health_how">请先安装或更新华为运动健康，配对 WATCH FIT 5，然后：\n\n1. 设备 → WATCH FIT 5 → 消息通知：打开通知总开关和「半小时震动」开关；若未单列本应用，请检查「其他」选项。\n2. 允许华为运动健康读取手机通知，并允许其后台运行/自启动。\n3. 关闭手表勿扰和睡眠模式；若有「多设备提醒」选项，请选中，避免使用手机时手表静默。\n4. 保持蓝牙连接。\n\n回来后点「我已完成」，再发送测试消息。这里只记录你确认过设置，无法检测连接或送达状态。</string>
+    <string name="watch_health_missing">未找到华为运动健康，请从华为官方渠道安装后按说明配对手表。</string>
+
     <!-- 状态卡片 -->
     <string name="hero_next">下次提醒</string>
     <string name="hero_off">提醒已关闭</string>

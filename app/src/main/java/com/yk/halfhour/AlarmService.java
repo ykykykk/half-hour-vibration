@@ -45,6 +45,7 @@ public class AlarmService extends Service {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private PowerManager.WakeLock cpuLock;
     private long lastVibrateAt;
+    private final WatchReminder watchReminder = new WatchReminder(this);
 
     static void start(Context c) {
         new Prefs(c).setRinging(true);
@@ -66,7 +67,10 @@ public class AlarmService extends Service {
 
     static void stop(Context c) {
         if (running) c.startService(new Intent(c, AlarmService.class).setAction(ACTION_STOP));
+        else c.getSystemService(NotificationManager.class).cancel(NOTIF_ID);
         new Prefs(c).setRinging(false);
+        WatchReminder.cancel(c);
+        c.sendBroadcast(new Intent(BROADCAST_DONE).setPackage(c.getPackageName()));
     }
 
     @Override
@@ -99,6 +103,7 @@ public class AlarmService extends Service {
             vibrate();
             handler.post(watchdog);
         }
+        watchReminder.start();
         wakeScreen();
         showAlarmScreen();
         return START_STICKY;
@@ -178,6 +183,7 @@ public class AlarmService extends Service {
     }
 
     private void finishRinging() {
+        watchReminder.stop();
         running = false;
         handler.removeCallbacksAndMessages(null);
         cancelVibration();
@@ -191,6 +197,7 @@ public class AlarmService extends Service {
 
     @Override
     public void onDestroy() {
+        watchReminder.stop();
         if (running) {
             running = false;
             handler.removeCallbacksAndMessages(null);

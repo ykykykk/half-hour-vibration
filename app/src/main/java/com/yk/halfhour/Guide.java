@@ -40,13 +40,13 @@ final class Guide {
     void startAll() {
         skipped.clear();
         chain = true;
-        steps = Steps.all();
+        steps = Steps.all(a);
         next();
     }
 
     void startSingle(Steps.Step s) {
         chain = false;
-        steps = Steps.all();
+        steps = Steps.all(a);
         showIntro(s, false);
     }
 
@@ -144,7 +144,8 @@ final class Guide {
         int left = Steps.pendingCount(a);
         Ui.Spec spec = new Ui.Spec();
         spec.title = a.getString(left == 0 ? R.string.guide_finish_title : R.string.guide_finish_title_partial);
-        spec.body = a.getString(R.string.guide_finish_body);
+        spec.body = a.getString(new Prefs(a).watchMode()
+                ? R.string.watch_test_body : R.string.guide_finish_body);
         if (left > 0) {
             spec.note = a.getString(R.string.guide_finish_left, left);
             spec.noteIsWarning = true;

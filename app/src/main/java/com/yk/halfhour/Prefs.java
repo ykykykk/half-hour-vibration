@@ -12,6 +12,7 @@ final class Prefs {
     private static final String K_END = "end_min";
     private static final String K_NEXT = "next_at";
     private static final String K_RINGING = "ringing";
+    private static final String K_WATCH_MODE = "watch_mode";
 
     private final SharedPreferences sp;
 
@@ -39,4 +40,8 @@ final class Prefs {
 
     boolean ringing() { return sp.getBoolean(K_RINGING, false); }
     void setRinging(boolean v) { sp.edit().putBoolean(K_RINGING, v).commit(); }
+
+    // 升级安装时保留原来的手机强提醒模式，用户可在首页切换。
+    boolean watchMode() { return sp.getBoolean(K_WATCH_MODE, false); }
+    void setWatchMode(boolean v) { sp.edit().putBoolean(K_WATCH_MODE, v).apply(); }
 }

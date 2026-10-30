@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -36,6 +37,7 @@ public class MainActivity extends Activity implements Guide.Listener {
         prefs = new Prefs(this);
         guide = new Guide(this, this);
         AlarmService.ensureChannel(this);
+        WatchReminder.ensureChannel(this);
 
         master = findViewById(R.id.master);
         startValue = findViewById(R.id.start_value);
@@ -45,9 +47,24 @@ public class MainActivity extends Activity implements Guide.Listener {
         master.setChecked(prefs.enabled());
         master.setOnCheckedChangeListener((b, on) -> {
             prefs.setEnabled(on);
-            if (!on) AlarmService.stop(this);
+            if (!on) {
+                AlarmService.stop(this);
+            }
             settingsChanged();
         });
+
+        Switch watchMode = findViewById(R.id.watch_mode);
+        watchMode.setChecked(prefs.watchMode());
+        watchMode.setOnCheckedChangeListener((b, on) -> {
+            guide.dismiss();
+            guide = new Guide(this, this);
+            AlarmService.stop(this);
+            prefs.setWatchMode(on);
+            refreshMode();
+            refreshPerms();
+            settingsChanged();
+        });
+        refreshMode();
 
         buildDayChips();
         findViewById(R.id.time_start).setOnClickListener(v -> pickTime(true));
@@ -100,7 +117,7 @@ public class MainActivity extends Activity implements Guide.Listener {
 
     @Override
     public void onGuideWantsTest() {
-        AlarmService.start(this);
+        testReminder();
     }
 
     // ---------- 界面 ----------
@@ -131,7 +148,7 @@ public class MainActivity extends Activity implements Guide.Listener {
     private void refreshPerms() {
         permList.removeAllViews();
         int left = 0;
-        for (Steps.Step s : Steps.all()) {
+        for (Steps.Step s : Steps.all(this)) {
             View row = getLayoutInflater().inflate(R.layout.row_perm, permList, false);
             TextView name = row.findViewById(R.id.perm_name);
             TextView state = row.findViewById(R.id.perm_state);
@@ -216,12 +233,36 @@ public class MainActivity extends Activity implements Guide.Listener {
 
     private void confirmTest() {
         Ui.Spec spec = new Ui.Spec();
-        spec.title = getString(R.string.test_title);
-        spec.body = getString(R.string.test_body);
+        spec.title = getString(prefs.watchMode() ? R.string.watch_test_title : R.string.test_title);
+        spec.body = getString(prefs.watchMode() ? R.string.watch_test_body : R.string.test_body);
         spec.primary = getString(R.string.test_start);
-        spec.onPrimary = () -> AlarmService.start(this);
+        spec.onPrimary = this::testReminder;
         spec.secondary = getString(R.string.cancel);
         Ui.show(this, spec);
+    }
+
+    private void refreshMode() {
+        ((TextView) findViewById(R.id.btn_test)).setText(
+                prefs.watchMode() ? R.string.watch_test_button : R.string.btn_test);
+        ((TextView) findViewById(R.id.mode_description)).setText(
+                prefs.watchMode() ? R.string.watch_mode_description : R.string.phone_mode_description);
+    }
+
+    private void testReminder() {
+        if (prefs.watchMode() && !WatchReminder.notificationsAllowed(this)) {
+            Ui.Spec spec = new Ui.Spec();
+            spec.title = getString(R.string.step_watch_channel);
+            spec.body = getString(R.string.watch_notification_blocked);
+            spec.primary = getString(R.string.guide_go_settings);
+            spec.onPrimary = () -> Oem.open(this,
+                    new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName()));
+            spec.secondary = getString(R.string.cancel);
+            Ui.show(this, spec);
+        } else {
+            AlarmService.start(this);
+        }
+        refreshHero();
     }
 
     private void settingsChanged() {

@@ -6,7 +6,6 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -83,21 +82,37 @@ final class Steps {
     }
 
     /** 按向导顺序排列；当前手机不需要的步骤不在列表里。 */
-    static List<Step> all() {
+    static List<Step> all(Context context) {
         List<Step> list = new ArrayList<>();
-        if (Build.VERSION.SDK_INT >= 33) {
+        boolean watch = new Prefs(context).watchMode();
+        {
             list.add(new Step("notif", R.string.step_notif,
                     a -> a.getString(notifBlocked(a) ? R.string.step_notif_how_blocked : R.string.step_notif_how),
-                    c -> bool(c.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-                            == PackageManager.PERMISSION_GRANTED),
+                    c -> bool(c.getSystemService(NotificationManager.class).areNotificationsEnabled()),
                     a -> {
-                        if (notifBlocked(a)) {
+                        if (Build.VERSION.SDK_INT < 33 || notifBlocked(a)) {
                             Oem.open(a, new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                     .putExtra(Settings.EXTRA_APP_PACKAGE, a.getPackageName()));
                         } else {
                             a.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
                                     REQ_NOTIF);
                         }
+                    }));
+        }
+        if (watch) {
+            list.add(new Step("watch_channel", R.string.step_watch_channel,
+                    a -> a.getString(R.string.step_watch_channel_how),
+                    c -> bool(WatchReminder.notificationsAllowed(c)),
+                    a -> Oem.open(a, new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, a.getPackageName())
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, WatchReminder.CHANNEL_ID))));
+            list.add(new Step("watch_health", R.string.step_watch_health,
+                    a -> a.getString(R.string.step_watch_health_how), null, a -> {
+                        Intent launch = a.getPackageManager().getLaunchIntentForPackage("com.huawei.health");
+                        if (launch == null) {
+                            android.widget.Toast.makeText(a, R.string.watch_health_missing,
+                                    android.widget.Toast.LENGTH_LONG).show();
+                        } else Oem.open(a, launch);
                     }));
         }
         if (Build.VERSION.SDK_INT >= 31) {
@@ -161,7 +176,7 @@ final class Steps {
 
     static int pendingCount(Context c) {
         int n = 0;
-        for (Step s : all()) if (!s.satisfied(c)) n++;
+        for (Step s : all(c)) if (!s.satisfied(c)) n++;
         return n;
     }
 }
