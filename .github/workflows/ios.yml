@@ -1,0 +1,29 @@
+name: Build iPhone
+on:
+  push:
+    branches: ['feat/iphone']
+  workflow_dispatch:
+jobs:
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install project generator
+        run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
+      - name: Test scheduling
+        run: swift test --package-path ios/Core
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Build iPhone Simulator app
+        run: xcodebuild -project ios/HalfHour.xcodeproj -scheme HalfHour -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/build CODE_SIGNING_ALLOWED=NO build
+      - name: Package source and simulator app
+        run: |
+          mkdir -p iphone-artifacts
+          ditto -c -k --sequesterRsrc --keepParent ios/build/Build/Products/Debug-iphonesimulator/HalfHour.app iphone-artifacts/HalfHour-Simulator.zip
+          git archive HEAD ios README.md > iphone-artifacts/iPhone-source.tar
+          cp -R ios/HalfHour.xcodeproj iphone-artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: half-hour-iphone
+          path: iphone-artifacts/

@@ -3,3 +3,8 @@ build/
 local.properties
 *.iml
 .idea/
+ios/Core/.build/
+*.xcodeproj/
+*.xcuserstate
+DerivedData/
+iphone-artifacts/
